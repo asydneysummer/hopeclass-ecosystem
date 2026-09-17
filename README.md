@@ -11,9 +11,9 @@
 | Module | Repository | Production |
 |--------|------------|------------|
 | **Core** — multi-tenant API, tutor PWA, control plane | [hopeclass-platform](https://github.com/asydneysummer/hopeclass-platform) *(private — request access)* | `*.hopeclass.ru`, `repetitor.hopeclass.ru`, `admin.hopeclass.ru` |
-| **Visiting cards** — public link-in-bio pages | hopeclass-cards | [hopeclass.ru/{slug}](https://hopeclass.ru) |
-| **Online whiteboard** — lobby + Excalidraw editor | hopeclass-desk | [desk.hopeclass.ru](https://desk.hopeclass.ru), [desk.metod-orbita.ru](https://desk.metod-orbita.ru) |
-| **Desktop** — Electron client, offline sync | hopeclass-desktop | Desktop releases |
+| **Visiting cards** — public link-in-bio pages | [hopeclass-cards](https://github.com/asydneysummer/hopeclass-cards) *(private — request access)* | [hopeclass.ru/{slug}](https://hopeclass.ru) |
+| **Online whiteboard** — lobby + Excalidraw editor | [hopeclass-desk](https://github.com/asydneysummer/hopeclass-desk) *(private — request access)* | [desk.hopeclass.ru](https://desk.hopeclass.ru), [desk.metod-orbita.ru](https://desk.metod-orbita.ru) |
+| **Desktop** — Electron client, offline sync | [hopeclass-desktop](https://github.com/asydneysummer/hopeclass-desktop) *(private — request access)* | Desktop releases |
 
 ---
 
