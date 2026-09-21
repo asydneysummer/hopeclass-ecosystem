@@ -6,6 +6,8 @@ This repository is the **public portfolio index** — architecture, production l
 
 > **Student testing (quiz)** runs on [metod-orbita.ru/quiz](https://metod-orbita.ru/quiz) — assigned from the HopeClass tutor cabinet via SSO; results return through webhook. Source: [metod-orbita-shop](https://github.com/asydneysummer/metod-orbita-shop) *(private — request access)*.
 
+**Production:** tenant apps on `*.hopeclass.ru`, portal [repetitor.hopeclass.ru](https://repetitor.hopeclass.ru), control plane [admin.hopeclass.ru](https://admin.hopeclass.ru), cards [hopeclass.ru/{slug}](https://hopeclass.ru), desk [desk.hopeclass.ru](https://desk.hopeclass.ru) / [desk.metod-orbita.ru](https://desk.metod-orbita.ru), desktop [releases.hopeclass.ru/desktop/](https://releases.hopeclass.ru/desktop/), shop [metod-orbita.ru](https://metod-orbita.ru), courses [courses.metod-orbita.ru](https://courses.metod-orbita.ru), quiz [metod-orbita.ru/quiz](https://metod-orbita.ru/quiz).
+
 ## Features
 
 - **Multi-tenant tutor SaaS:** database-per-teacher PostgreSQL isolation, white-label domains on `*.hopeclass.ru`, shared login portal, dynamic PWA branding
@@ -28,6 +30,23 @@ This repository is the **public portfolio index** — architecture, production l
 | **Desktop** — Electron client, offline sync | [hopeclass-desktop](https://github.com/asydneysummer/hopeclass-desktop) *(private — request access)* | [releases.hopeclass.ru/desktop/](https://releases.hopeclass.ru/desktop/) |
 | **Metod shop + quiz** | [metod-orbita-shop](https://github.com/asydneysummer/metod-orbita-shop) *(private — request access)* | [metod-orbita.ru](https://metod-orbita.ru), [metod-orbita.ru/quiz](https://metod-orbita.ru/quiz) |
 | **Metod courses LMS** | [metod-orbita-courses](https://github.com/asydneysummer/metod-orbita-courses) *(private — request access)* | [courses.metod-orbita.ru](https://courses.metod-orbita.ru) |
+
+## Roles & capabilities (ecosystem)
+
+| Role | Product / surface | Capabilities (summary) |
+|------|-------------------|-------------------------|
+| **Public visitor** | hopeclass.ru/{slug}, Metod shop pages, courses landing, desk login screen | View published visiting cards; browse shop catalog/blog/legal; view courses tile catalog; open desk login — no tenant or shop JWT |
+| **teacher** | HopeClass PWA, Desktop (primary), Desk | Full tutor operations: students, parents, schedule, topics, homework, finance, groups, quizzes assignment, notifications; desk board CRUD; desktop offline shell |
+| **student** | HopeClass PWA, Desktop, Desk, Metod quiz | Own schedule/homework/topics; desk boards assigned; take quizzes at `/quiz`; shop `student` role when registered via teacher phone |
+| **parent** | HopeClass PWA, Desktop | Read-only child progress, schedule, homework, finance; messaging; audited views in `ParentLog`; desk login without board access |
+| **control-plane admin** | admin.hopeclass.ru | Fleet tenant registry, themes, provisioning, support — not a tenant `User` JWT |
+| **shop customer** | metod-orbita.ru | Purchases, profile, students, HopeClass trial/card, quiz authoring, courses SSO |
+| **shop student** | metod-orbita.ru, /quiz | Linked to teacher; quizzes; no HopeClass trial or card editor |
+| **shop admin** | metod-orbita.ru `/admin` | Catalog, orders, users, content ops, student-link moderation |
+| **quiz_admin** | metod-orbita.ru/quiz | Quiz catalog and grading admin without full shop admin |
+| **courses listener (`teacher` in LMS JWT)** | courses.metod-orbita.ru | Entitled courses, articles, homework, coins, device limits |
+| **course_editor** | courses admin CMS | Edit course tree/articles; no homework review or publish-to-shop |
+| **courses admin** | courses admin (all tabs) | Homework review, devices, password-reset ops, publish products to shop |
 
 ## Module detail — HopeClass Platform
 
@@ -213,6 +232,17 @@ Production UI samples (no PII). Full-resolution assets live under [`docs/screens
 | metod-orbita-shop | metod-orbita-courses | JWT SSO (`POST /api/auth/exchange`); subscription and course-subscriber APIs |
 | metod-orbita-shop | HopeClass quiz | Shared JWT; internal purchase-aware assignment helpers |
 
+## Key engineering work
+
+- **Multi-tenant PostgreSQL** — database-per-teacher behind Prisma proxy; Host / `x-tenant-slug` routing; JWT bound to `tenantId`
+- **Control plane** — tenant registry, provisioning CLI, fleet migrations, support backend on `admin.hopeclass.ru`
+- **Mobile-first PWA** — unified tutor cabinet for teacher, student, parent with Web Push
+- **Visiting cards** — standalone public SPA + theme preset pipeline synced to Metod shop
+- **Desk** — Excalidraw embed, debrand Docker stack, dual-host deploy (HopeClass API vs Orbita-local API)
+- **Desktop** — Electron offline snapshots, outbox replay, white-label release matrix
+- **Quiz SSO + webhooks** — HopeClass assigns tests; learners launch Metod quiz; per-tenant webhook keys for results
+- **Metod commerce** — Prodamus checkout, order fulfillment, course subscription activation, shop↔courses SSO exchange
+
 ## Tech stack
 
 | Area | Stack |
@@ -273,6 +303,8 @@ Do not commit real credentials; use placeholders from each repo’s `.env.exampl
 
 > **Тестирование учеников (квизы)** — [metod-orbita.ru/quiz](https://metod-orbita.ru/quiz): назначается из кабинета репетитора HopeClass через SSO; результаты возвращаются webhook-ом. Исходники: [metod-orbita-shop](https://github.com/asydneysummer/metod-orbita-shop) *(приватный — запросите доступ)*.
 
+**Продакшен:** tenant на `*.hopeclass.ru`, портал [repetitor.hopeclass.ru](https://repetitor.hopeclass.ru), control plane [admin.hopeclass.ru](https://admin.hopeclass.ru), визитки [hopeclass.ru/{slug}](https://hopeclass.ru), desk [desk.hopeclass.ru](https://desk.hopeclass.ru) / [desk.metod-orbita.ru](https://desk.metod-orbita.ru), desktop [releases.hopeclass.ru/desktop/](https://releases.hopeclass.ru/desktop/), магазин [metod-orbita.ru](https://metod-orbita.ru), курсы [courses.metod-orbita.ru](https://courses.metod-orbita.ru), квизы [metod-orbita.ru/quiz](https://metod-orbita.ru/quiz).
+
 ## Возможности
 
 - **Мультитenant SaaS для репетиторов:** изоляция PostgreSQL на преподавателя, white-label на `*.hopeclass.ru`, общий портал входа, брендинг PWA
@@ -295,6 +327,23 @@ Do not commit real credentials; use placeholders from each repo’s `.env.exampl
 | **Desktop** — Electron, офлайн-синхронизация | [hopeclass-desktop](https://github.com/asydneysummer/hopeclass-desktop) *(приватный — запросите доступ)* | [releases.hopeclass.ru/desktop/](https://releases.hopeclass.ru/desktop/) |
 | **Магазин + квизы** | [metod-orbita-shop](https://github.com/asydneysummer/metod-orbita-shop) *(приватный — запросите доступ)* | [metod-orbita.ru](https://metod-orbita.ru), [metod-orbita.ru/quiz](https://metod-orbita.ru/quiz) |
 | **LMS курсов** | [metod-orbita-courses](https://github.com/asydneysummer/metod-orbita-courses) *(приватный — запросите доступ)* | [courses.metod-orbita.ru](https://courses.metod-orbita.ru) |
+
+## Роли и возможности (экосистема)
+
+| Роль | Продукт / поверхность | Возможности (кратко) |
+|------|------------------------|----------------------|
+| **Публичный посетитель** | hopeclass.ru/{slug}, страницы магазина, лендинг courses, login Desk | Визитки, каталог/блог магазина, плитки курсов, экран входа Desk — без JWT |
+| **teacher** | HopeClass PWA, Desktop, Desk | Полный кабинет репетитора; CRUD досок; desktop offline |
+| **student** | HopeClass PWA, Desktop, Desk, квиз | Расписание, ДЗ, темы; доски; `/quiz`; роль `student` в shop при регистрации по телефону учителя |
+| **parent** | HopeClass PWA, Desktop | Read-only по детям, финансы, логи `ParentLog`; Desk без досок |
+| **админ control-plane** | admin.hopeclass.ru | Флот tenant-ов, темы, провижининг, поддержка |
+| **shop customer** | metod-orbita.ru | Покупки, профиль, ученики, trial HopeClass, визитка, квизы, SSO courses |
+| **shop student** | metod-orbita.ru, /quiz | Связь с учителем; квизы; без trial и редактора визитки |
+| **shop admin** | `/admin` магазина | Товары, заказы, пользователи, контент, заявки учеников |
+| **quiz_admin** | /quiz | Админка квизов без полной админки магазина |
+| **слушатель courses (`teacher` в JWT LMS)** | courses.metod-orbita.ru | Курсы, статьи, ДЗ, монетки, лимиты устройств |
+| **course_editor** | админ CMS courses | Редактирование курсов; без проверки ДЗ и publish в shop |
+| **courses admin** | все вкладки админки courses | ДЗ, устройства, сброс паролей, публикация в shop |
 
 ## Модуль — HopeClass Platform
 
@@ -478,6 +527,17 @@ Do not commit real credentials; use placeholders from each repo’s `.env.exampl
 | hopeclass-desk | HopeClass server | JWT, `/api/desk/*`, WebSocket desk-live |
 | metod-orbita-shop | metod-orbita-courses | SSO (`POST /api/auth/exchange`), подписки |
 | metod-orbita-shop | HopeClass quiz | Общий JWT; internal assignment helpers |
+
+## Ключевая инженерная работа
+
+- **Мультитenant PostgreSQL** — БД на преподавателя, Prisma proxy, Host / `x-tenant-slug`, JWT с `tenantId`
+- **Control plane** — реестр tenant-ов, CLI провижининга, миграции по флоту, поддержка на `admin.hopeclass.ru`
+- **Mobile-first PWA** — единый кабинет teacher/student/parent, Web Push
+- **Визитки** — публичное SPA + pipeline пресетов в shop Методики
+- **Desk** — встраивание Excalidraw, Docker debrand, два prod-хоста
+- **Desktop** — офлайн snapshots, outbox, white-label релизы
+- **SSO квизов + webhooks** — назначение из HopeClass; запуск на Metod; webhook по tenant
+- **Коммерция Metod** — Prodamus, fulfillment, активация подписок на курсы, SSO shop↔courses
 
 ## Стек
 
