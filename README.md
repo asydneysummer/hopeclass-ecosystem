@@ -1,8 +1,10 @@
-# HopeClass — Tutor Ecosystem
+# HopeClass — multi-tenant tutor ecosystem
 
-**HopeClass** is a multi-tenant EdTech platform for tutors: student/parent/teacher cabinet (PWA), admin control plane, public visiting cards, real-time whiteboard, and desktop client. Modules share one product story but live in separate private repos for clarity and deploy boundaries.
+**HopeClass** is a multi-tenant EdTech platform for tutors: student, parent, and teacher cabinet (PWA), admin control plane, public visiting cards, real-time whiteboard, and desktop client. Modules share one product story but live in separate private repos for deploy boundaries. Built and owned by Michael ([asydneysummer](https://github.com/asydneysummer)).
 
-> **Student testing (quiz)** runs on [metod-orbita.ru/quiz](https://metod-orbita.ru/quiz) — assigned from the HopeClass tutor cabinet via SSO; results return through webhook. Source: [metod-orbita-shop](https://github.com/asydneysummer/metod-orbita-shop) *(private — request access)*.
+**Production:** [*.hopeclass.ru](https://hopeclass.ru) (tenant subdomains), [repetitor.hopeclass.ru](https://repetitor.hopeclass.ru), [admin.hopeclass.ru](https://admin.hopeclass.ru), public cards at [hopeclass.ru/{slug}](https://hopeclass.ru), whiteboard at [desk.hopeclass.ru](https://desk.hopeclass.ru) and [desk.metod-orbita.ru](https://desk.metod-orbita.ru), student quizzes at [metod-orbita.ru/quiz](https://metod-orbita.ru/quiz).
+
+This repository (**[hopeclass-ecosystem](https://github.com/asydneysummer/hopeclass-ecosystem)**) is the public portfolio index for the HopeClass module family. Application source lives in the linked private repos below.
 
 ## Features
 
@@ -10,20 +12,20 @@
 - Mobile-first PWA for teachers, students, and parents
 - Control plane for tenant registry, provisioning, and support
 - Public visiting cards at `hopeclass.ru/{slug}`
-- Real-time whiteboard (Excalidraw) at desk.hopeclass.ru
+- Real-time whiteboard (Excalidraw) on desk hosts
 - Electron desktop client with offline sync and white-label branding
-- Quiz integration with Metod Orbita via SSO and webhooks
+- Quiz integration with Metod Orbita: assign from the tutor cabinet, launch via SSO, results via webhook
 
-## Modules
+## Roles & capabilities
 
-| Module | Repository | Production |
-|--------|------------|------------|
-| **Core** — multi-tenant API, tutor PWA, control plane | [hopeclass-platform](https://github.com/asydneysummer/hopeclass-platform) *(private — request access)* | `*.hopeclass.ru`, `repetitor.hopeclass.ru`, `admin.hopeclass.ru` |
-| **Visiting cards** — public link-in-bio pages | [hopeclass-cards](https://github.com/asydneysummer/hopeclass-cards) *(private — request access)* | [hopeclass.ru/{slug}](https://hopeclass.ru) |
-| **Online whiteboard** — lobby + Excalidraw editor | [hopeclass-desk](https://github.com/asydneysummer/hopeclass-desk) *(private — request access)* | [desk.hopeclass.ru](https://desk.hopeclass.ru), [desk.metod-orbita.ru](https://desk.metod-orbita.ru) |
-| **Desktop** — Electron client, offline sync | [hopeclass-desktop](https://github.com/asydneysummer/hopeclass-desktop) *(private — request access)* | Desktop releases |
+| Role | Can do |
+|------|--------|
+| **Teacher** | Use the tutor PWA on tenant hosts (`*.hopeclass.ru`, `repetitor.hopeclass.ru`); manage the tenant-scoped API; assign Metod Orbita quizzes (SSO launch to `metod-orbita.ru/quiz`); open the desk whiteboard; publish a visiting card at `hopeclass.ru/{slug}` |
+| **Student** | Use the mobile-first PWA in the tutor tenant; take assigned quizzes on `metod-orbita.ru/quiz` via SSO; receive quiz outcomes synced back into HopeClass (webhook → reports and push) |
+| **Parent** | Use parent-facing flows in the same tenant-scoped PWA (shared JWT auth and Host / `x-tenant-slug` routing) |
+| **Admin (control plane)** | Operate tenant registry, provisioning, and support tooling on `admin.hopeclass.ru` (separate control-plane app, not tenant JWT) |
 
-## Architecture (high level)
+## Architecture / tech map
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -40,8 +42,6 @@
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Cross-product integrations
-
 | From | To | Mechanism |
 |------|-----|-----------|
 | HopeClass tutor-app | metod-orbita quiz | Test assignment, SSO launch |
@@ -50,14 +50,39 @@
 | hopeclass-cards | metod-orbita-shop | Card theme presets sync |
 | hopeclass-desk | HopeClass server | JWT auth, `/api/desk/*` |
 
-## Tech stack (core)
+## Key engineering work
+
+- **Multi-tenant PostgreSQL isolation** — one database per teacher behind a multi-tenant API proxy; routing by Host header and `x-tenant-slug`
+- **Control plane** — tenant registry, provisioning, and support surfaces decoupled from tenant runtime (`admin.hopeclass.ru`)
+- **Mobile-first PWA** — React + Vite tutor cabinet for teachers, students, and parents with JWT bearer auth
+- **Visiting cards** — separately deployed public link-in-bio app at `hopeclass.ru/{slug}` with cross-product theme preset sync
+- **Desk (Excalidraw)** — collaborative lobby + editor (`hopeclass-desk`) authenticated against HopeClass `/api/desk/*`
+- **Electron offline** — desktop client with offline sync and white-label branding (`hopeclass-desktop`)
+- **Quiz SSO and webhooks** — tutor assigns tests in-app; learners launch `metod-orbita.ru/quiz` via SSO; quiz module posts results with per-tenant webhook keys
+- **Metod Orbita bridge** — shop integration for trial schools, user ensure, and visiting-card editor APIs; courses LMS SSO via shop JWT (`metod-orbita-courses`)
+
+## Tech stack
 
 - **Backend:** Node.js, Express, Prisma, PostgreSQL (per-tenant isolation via proxy)
 - **Frontend:** React, Vite, Zustand, mobile-first PWA
 - **Admin:** control-plane (tenant registry, provisioning, support)
 - **Auth:** JWT bearer; multi-tenant routing by Host / `x-tenant-slug`
+- **Desk:** Excalidraw-based collab app (separate repo)
+- **Desktop:** Electron (separate repo)
 
-## Setup
+## Repository layout
+
+| Path | Role |
+|------|------|
+| `README.md` | Public employer-facing ecosystem index (this file) |
+
+Runtime apps and services live in the module repositories listed below—not in this index repo.
+
+## Local setup
+
+There is no application code in **hopeclass-ecosystem**. Clone **[hopeclass-platform](https://github.com/asydneysummer/hopeclass-platform)** *(private — request access)* and use its README / `.env.example` for env vars and deploy scripts.
+
+Typical core dev commands (from **hopeclass-platform**):
 
 ```bash
 # API (multi-tenant)
@@ -70,98 +95,56 @@ cd tutor-app && npm run dev
 cd control-plane && npm run dev
 ```
 
-See each repo's README for env vars and deploy scripts.
+Other modules (cards, desk, desktop, Metod Orbita) document their own setup in each repo.
 
-## Related repos (Metod Orbita)
+## Related repositories
 
-| Repo | Scope |
-|------|-------|
-| [metod-orbita-shop](https://github.com/asydneysummer/metod-orbita-shop) *(private — request access)* | Store, payments (Prodamus), quiz SPA + API, HopeClass bridge |
-| [metod-orbita-courses](https://github.com/asydneysummer/metod-orbita-courses) *(private — request access)* | Course platform; SSO via shop JWT |
+### HopeClass modules
 
-*Portfolio index · private source repos · author: Michael / asydneysummer*
+| Module | Repository | Production |
+|--------|------------|------------|
+| **Core** — multi-tenant API, tutor PWA, control plane | [hopeclass-platform](https://github.com/asydneysummer/hopeclass-platform) *(private — request access)* | `*.hopeclass.ru`, `repetitor.hopeclass.ru`, `admin.hopeclass.ru` |
+| **Visiting cards** — public link-in-bio pages | [hopeclass-cards](https://github.com/asydneysummer/hopeclass-cards) *(private — request access)* | [hopeclass.ru/{slug}](https://hopeclass.ru) |
+| **Online whiteboard** — lobby + Excalidraw editor | [hopeclass-desk](https://github.com/asydneysummer/hopeclass-desk) *(private — request access)* | [desk.hopeclass.ru](https://desk.hopeclass.ru), [desk.metod-orbita.ru](https://desk.metod-orbita.ru) |
+| **Desktop** — Electron client, offline sync | [hopeclass-desktop](https://github.com/asydneysummer/hopeclass-desktop) *(private — request access)* | Desktop releases |
+
+### Metod Orbita (quiz & courses)
+
+| Repo | Scope | Production |
+|------|-------|------------|
+| [metod-orbita-shop](https://github.com/asydneysummer/metod-orbita-shop) *(private — request access)* | Store, payments (Prodamus), quiz SPA + API, HopeClass bridge | [metod-orbita.ru/quiz](https://metod-orbita.ru/quiz) (quiz); shop surfaces per that repo |
+| [metod-orbita-courses](https://github.com/asydneysummer/metod-orbita-courses) *(private — request access)* | Course platform; SSO via shop JWT | Per **metod-orbita-courses** deploy docs |
+
+*Private portfolio index · request access to module source repos · author: Michael / asydneysummer*
 
 ---
 
 # HopeClass — экосистема для репетитора
 
-**HopeClass** — мультитenant EdTech-платформа для репетиторов: кабинет ученика/родителя/преподавателя (PWA), админ-панель, публичные визитки, онлайн-доска и десктоп-клиент. Модули образуют единый продукт, но вынесены в отдельные приватные репозитории для ясности границ деплоя.
+**HopeClass** — мультитenant EdTech-платформа для репетиторов: кабинет ученика, родителя и преподавателя (PWA), control plane, публичные визитки, онлайн-доска и десктоп-клиент. Автор и владелец продукта: Michael ([asydneysummer](https://github.com/asydneysummer)).
 
-> **Тестирование учеников (квизы)** работает на [metod-orbita.ru/quiz](https://metod-orbita.ru/quiz) — назначается из кабинета репетитора HopeClass через SSO; результаты возвращаются webhook-ом. Исходники: [metod-orbita-shop](https://github.com/asydneysummer/metod-orbita-shop) *(приватный — запросите доступ)*.
+**Продакшен:** [*.hopeclass.ru](https://hopeclass.ru), [repetitor.hopeclass.ru](https://repetitor.hopeclass.ru), [admin.hopeclass.ru](https://admin.hopeclass.ru), визитки [hopeclass.ru/{slug}](https://hopeclass.ru), доска [desk.hopeclass.ru](https://desk.hopeclass.ru) / [desk.metod-orbita.ru](https://desk.metod-orbita.ru), квизы учеников — [metod-orbita.ru/quiz](https://metod-orbita.ru/quiz).
 
-## Возможности
+Этот репозиторий — публичный портфолио-индекс экосистемы; исходники приложений — в связанных приватных репозиториях.
 
-- Мультитenant SaaS для репетиторов с изоляцией PostgreSQL на каждого преподавателя
-- Mobile-first PWA для учителей, учеников и родителей
-- Control plane: реестр tenant-ов, провижининг, поддержка
-- Публичные визитки на `hopeclass.ru/{slug}`
-- Онлайн-доска (Excalidraw) на desk.hopeclass.ru
-- Electron-клиент с офлайн-синхронизацией и white-label брендингом
-- Интеграция квизов с Методикой Орбита через SSO и webhooks
+## Роли
+
+| Роль | Возможности |
+|------|-------------|
+| **Преподаватель** | PWA на tenant-хостах; назначение квизов Metod Orbita (SSO); доска; визитка `hopeclass.ru/{slug}` |
+| **Ученик** | PWA в tenant; прохождение квизов на `metod-orbita.ru/quiz`; результаты через webhook в HopeClass |
+| **Родитель** | Родительские сценарии в том же tenant-scoped PWA |
+| **Админ (control plane)** | Реестр tenant-ов, провижининг, поддержка на `admin.hopeclass.ru` |
 
 ## Модули
 
 | Модуль | Репозиторий | Продакшен |
 |--------|-------------|-----------|
-| **Ядро** — мультитenant API, PWA репетитора, control plane | [hopeclass-platform](https://github.com/asydneysummer/hopeclass-platform) *(приватный — запросите доступ)* | `*.hopeclass.ru`, `repetitor.hopeclass.ru`, `admin.hopeclass.ru` |
-| **Визитки** — публичные link-in-bio страницы | [hopeclass-cards](https://github.com/asydneysummer/hopeclass-cards) *(приватный — запросите доступ)* | [hopeclass.ru/{slug}](https://hopeclass.ru) |
-| **Онлайн-доска** — лобби + редактор Excalidraw | [hopeclass-desk](https://github.com/asydneysummer/hopeclass-desk) *(приватный — запросите доступ)* | [desk.hopeclass.ru](https://desk.hopeclass.ru), [desk.metod-orbita.ru](https://desk.metod-orbita.ru) |
-| **Десктоп** — Electron-клиент, офлайн-синхронизация | [hopeclass-desktop](https://github.com/asydneysummer/hopeclass-desktop) *(приватный — запросите доступ)* | Релизы для desktop |
+| **Ядро** | [hopeclass-platform](https://github.com/asydneysummer/hopeclass-platform) *(приватный)* | `*.hopeclass.ru`, `repetitor.hopeclass.ru`, `admin.hopeclass.ru` |
+| **Визитки** | [hopeclass-cards](https://github.com/asydneysummer/hopeclass-cards) *(приватный)* | [hopeclass.ru/{slug}](https://hopeclass.ru) |
+| **Доска** | [hopeclass-desk](https://github.com/asydneysummer/hopeclass-desk) *(приватный)* | [desk.hopeclass.ru](https://desk.hopeclass.ru), [desk.metod-orbita.ru](https://desk.metod-orbita.ru) |
+| **Десктоп** | [hopeclass-desktop](https://github.com/asydneysummer/hopeclass-desktop) *(приватный)* | Desktop-релизы |
+| **Квизы (Metod Orbita)** | [metod-orbita-shop](https://github.com/asydneysummer/metod-orbita-shop) *(приватный)* | [metod-orbita.ru/quiz](https://metod-orbita.ru/quiz) |
+| **Курсы (Metod Orbita)** | [metod-orbita-courses](https://github.com/asydneysummer/metod-orbita-courses) *(приватный)* | По документации репозитория |
 
-## Архитектура (обзор)
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│ Экосистема HopeClass                                        │
-│  tutor-app ←→ server (БД tenant на преподавателя) ←→ control-plane │
-│  card-app (публичный) · desk-app (коллаб) · hopeclass-desktop │
-└───────────────────────────┬─────────────────────────────────┘
-                            │ HTTP + shared secrets
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│ Методика Орбита (отдельные репозитории)                     │
-│  metod-orbita-shop: магазин + модуль квизов                 │
-│  metod-orbita-courses: LMS (SSO через JWT магазина)         │
-└─────────────────────────────────────────────────────────────┘
-```
-
-## Межпродуктовые интеграции
-
-| Откуда | Куда | Механизм |
-|--------|------|----------|
-| HopeClass tutor-app | квиз metod-orbita | Назначение теста, SSO-запуск |
-| quiz-module | HopeClass API | Webhook с ключом tenant → отчёты + push |
-| metod-orbita-shop | HopeClass | Пробные школы, ensure-user, API редактора визитки |
-| hopeclass-cards | metod-orbita-shop | Синхронизация пресетов тем визиток |
-| hopeclass-desk | HopeClass server | JWT-авторизация, `/api/desk/*` |
-
-## Стек (ядро)
-
-- **Backend:** Node.js, Express, Prisma, PostgreSQL (изоляция tenant через proxy)
-- **Frontend:** React, Vite, Zustand, mobile-first PWA
-- **Админка:** control-plane (реестр tenant-ов, провижининг, поддержка)
-- **Auth:** JWT bearer; мультитenant-маршрутизация по Host / `x-tenant-slug`
-
-## Установка
-
-```bash
-# API (мультитenant)
-cd server && MULTI_TENANT=true CONTROL_DATABASE_URL=... npm run dev
-
-# PWA репетитора
-cd tutor-app && npm run dev
-
-# Control plane
-cd control-plane && npm run dev
-```
-
-Подробности по env и деплою — в README каждого репозитория.
-
-## Связанные репозитории (Методика Орбита)
-
-| Репозиторий | Назначение |
-|-------------|------------|
-| [metod-orbita-shop](https://github.com/asydneysummer/metod-orbita-shop) *(приватный — запросите доступ)* | Магазин, оплата (Prodamus), SPA + API квизов, мост HopeClass |
-| [metod-orbita-courses](https://github.com/asydneysummer/metod-orbita-courses) *(приватный — запросите доступ)* | Платформа курсов; SSO через JWT магазина |
-
-*Портфолио-индекс · приватные исходники · автор: Michael / asydneysummer*
+*Портфолио-индекс · запросите доступ к исходникам модулей*
