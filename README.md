@@ -1,6 +1,6 @@
 # HopeClass — multi-tenant tutor ecosystem
 
-**HopeClass** is a multi-tenant EdTech platform for tutors: student, parent, and teacher cabinet (PWA), admin control plane, public visiting cards, real-time whiteboard, and desktop client. Modules share one product story but live in separate private repos for deploy boundaries. Built and owned by Michael ([asydneysummer](https://github.com/asydneysummer)).
+**HopeClass** is a multi-tenant EdTech platform for tutors: student, parent, and teacher cabinet (PWA), admin control plane, public visiting cards, real-time whiteboard, and desktop client. Modules share one product story but live in separate private repos for deploy boundaries. Built and owned by Alexander ([asydneysummer](https://github.com/asydneysummer)).
 
 **Production:** [*.hopeclass.ru](https://hopeclass.ru) (tenant subdomains), [repetitor.hopeclass.ru](https://repetitor.hopeclass.ru), [admin.hopeclass.ru](https://admin.hopeclass.ru), public cards at [hopeclass.ru/{slug}](https://hopeclass.ru), whiteboard at [desk.hopeclass.ru](https://desk.hopeclass.ru) and [desk.metod-orbita.ru](https://desk.metod-orbita.ru), student quizzes at [metod-orbita.ru/quiz](https://metod-orbita.ru/quiz).
 
@@ -115,13 +115,13 @@ Other modules (cards, desk, desktop, Metod Orbita) document their own setup in e
 | [metod-orbita-shop](https://github.com/asydneysummer/metod-orbita-shop) *(private — request access)* | Store, payments (Prodamus), quiz SPA + API, HopeClass bridge | [metod-orbita.ru/quiz](https://metod-orbita.ru/quiz) (quiz); shop surfaces per that repo |
 | [metod-orbita-courses](https://github.com/asydneysummer/metod-orbita-courses) *(private — request access)* | Course platform; SSO via shop JWT | Per **metod-orbita-courses** deploy docs |
 
-*Private portfolio index · request access to module source repos · author: Michael / asydneysummer*
+*Private portfolio index · request access to module source repos · author: Alexander / asydneysummer*
 
 ---
 
 # HopeClass — экосистема для репетитора
 
-**HopeClass** — мультитenant EdTech-платформа для репетиторов: кабинет ученика, родителя и преподавателя (PWA), control plane, публичные визитки, онлайн-доска и десктоп-клиент. Автор и владелец продукта: Michael ([asydneysummer](https://github.com/asydneysummer)).
+**HopeClass** — мультитenant EdTech-платформа для репетиторов: кабинет ученика, родителя и преподавателя (PWA), control plane, публичные визитки, онлайн-доска и десктоп-клиент. Автор и владелец продукта: Alexander ([asydneysummer](https://github.com/asydneysummer)).
 
 **Продакшен:** [*.hopeclass.ru](https://hopeclass.ru), [repetitor.hopeclass.ru](https://repetitor.hopeclass.ru), [admin.hopeclass.ru](https://admin.hopeclass.ru), визитки [hopeclass.ru/{slug}](https://hopeclass.ru), доска [desk.hopeclass.ru](https://desk.hopeclass.ru) / [desk.metod-orbita.ru](https://desk.metod-orbita.ru), квизы учеников — [metod-orbita.ru/quiz](https://metod-orbita.ru/quiz).
 
